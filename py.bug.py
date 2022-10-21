@@ -1,4 +1,4 @@
-# (c) "Shiromi", "pacmax42" 2020
+# (c) "Shiromi", max 2020
 # Python debugger
 
 from enum import Enum
