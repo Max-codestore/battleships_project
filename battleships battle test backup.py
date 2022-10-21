@@ -1,4 +1,4 @@
-#pacmax42 2018-
+#max 2018-
 #v0.1.9
 #planned features for the future:
 
