@@ -1,4 +1,5 @@
 import random,time,text_file_manger
+from decimal import Decimal
 ships = 1.1
 kgVgunsc = 14
 kgVarmour = 14.7
@@ -98,14 +99,15 @@ p2speed = 0
 zero_in1 = 11
 p1turrets=[]
 p2turrets=[]
+ship2 =''
 hit_scored1 = False
 zero_in2 = 11
 hit_scored2 = False
-true_range1 = round(random.uniform(5, 60), 1)
-true_range2 = round(random.uniform(5, 60), 1)
 x = zero_in1 + 1
 hit1=False
 hit2=False
+true_range1 = round(random.uniform(5, 60), 1)
+true_range2 = round(random.uniform(5, 60), 1)
 range_finder_damage1 = 0
 range_finder_damage2 = 0
 targethit1 = False
@@ -124,7 +126,7 @@ class Debug:
         _args = _args[:len(_args) - 1]
         print("[FUNCTION]: Executed '%s' with '%s' as arguments." % (name, _args))
 d=Debug()
-def range_finder(true_range,hit_scored,damaged,zero_in):
+def range_finder(true_range,hit_scored,damaged,zero_in,smoke):
     zero_in -= 1
     if damaged >= 4:
         message = ['....','EORROR 4234','...............','*indistinguable screaming*','*broken fax noices*','N/A','???????','*flames*']
@@ -132,15 +134,26 @@ def range_finder(true_range,hit_scored,damaged,zero_in):
         return esimate
     if zero_in <= 0:
         zero_in = 0
-    if hit_scored == True:
-        estimate = true_range + random.randint(0,1) - random.randint(0,1) + damaged
+    if hit_scored == True and smoke == False:
+        estimate = true_range + round(random.uniform(1, 3)) - round(random.uniform(1, 3)) + damaged
+        return estimate
+    elif hit_scored == True and smoke == True:
+        estimate = true_range + round(random.uniform(1, 3)) - round(random.uniform(1, 3)) + damaged
+        return estimate
+    if smoke == True:
+        long_or_short = random.randint(0,1)
+        if long_or_short == 1:
+            estimate = true_range + round(random.uniform(0,zero_in+3),1) + damaged
+        else:
+            estimate = true_range - round(random.uniform(0,zero_in+3),1) - damaged
+        return estimate
     else:
         long_or_short = random.randint(0,1)
         if long_or_short == 1:
             estimate = true_range + round(random.uniform(0,zero_in),1) + damaged
         else:
             estimate = true_range - round(random.uniform(0,zero_in),1) - damaged
-    return estimate
+        return estimate
 
 def tosa2():
             global ships
@@ -313,19 +326,35 @@ def queen_elizabeth2():
             p2gunsn = qegunsn
             p2hp = qehp
             p2turrets = [2,2,2,2]
-
+def set_ranges(range1,range2):
+    global true_range1,true_range2
+    true_range1 = range1
+    true_range2 = range2
+    gameend = 3
+    return gameend
 def ai_choose(choice: str, won: bool):
     global f
     if won == False:
         f.append(choice)
     else:
-        print('request resived')
         text_file_manger.append_file_list('study.txt',f)
         h=text_file_manger.read_text_file('study.txt')
         return h
-
-def battle_ai():
-    global range_finder_damage1,range_finder_damage2,true_range2,hit1,hit2,p2location, p2moving,p1turrets,p2turrets,p2speed, p2direction, p1location, p1direction, p1first_smoke_shot, p1shots, p2shots, p2first_smoke_shot, p2movespeed, p1smoke_charges, p1speed, p2smoke_charges, reset, p1movespeed, gameend, p1moving, p1hp, p2hp, firstime, p1smoke, p2smoke, p1smoke_time, p2smoke_time, p1armour, p2gunsc, p1gunsn, p2armour, p1gunsc, p2gunsn, shots1, shots2, gameend, your_turn, their_turn, p1
+range_set = False
+def battle_ai(gameend):
+    global range_finder_damage1,range_finder_damage2,hit1,hit2,p2location, p2moving,p1turrets,p2turrets,p2speed, p2direction, p1location, p1direction, p1first_smoke_shot, p1shots, p2shots, p2first_smoke_shot, p2movespeed, p1smoke_charges, p1speed, p2smoke_charges, reset, p1movespeed, p1moving, p1hp, p2hp, firstime, p1smoke, p2smoke, p1smoke_time, p2smoke_time, p1armour, p2gunsc, p1gunsn, p2armour, p1gunsc, p2gunsn, shots1, shots2,your_turn, their_turn, p1,range_set,true_range1,true_range2
+    if p1gunsc == p2gunsc:
+        true_range2 = true_range1
+    if p2hp <= 0:
+        p2hp = 0
+        gameend = 5
+        range_set = False
+        return gameend
+    if p1hp <= 0:
+        p1hp = 0
+        gameend = gameend + 4
+        range_set = False
+        return gameend
     your_turn = 1
     their_turn = 1
     if p1gunsc == p2gunsc:
@@ -357,15 +386,24 @@ def battle_ai():
     magdet = [23]
     targethit1 = true_range1
     targethit2 = true_range2
-    smoke_target_hit = [5, 9, 40, 27, 32, 15]
     while your_turn == 1:
         p1turn = input('player 1 pick  what to do 1:fire guns 2:deploy smoke screen3:move to a new place')
         if (p1turn == '1'):
-            solution = range_finder(true_range1, hit1, range_finder_damage1, zero_in1)
+            solution = range_finder(true_range1, hit1, range_finder_damage1, zero_in1,p2smoke)
             print(solution)
             player1elevation = float(input("enter the elevation to fire at "))
             player1spreed=input("do you want to fire with a narrow spreed or wide spreed")
             player1spreed.lower()
+            if p2smoke_time >= 1:
+                if p2first_smoke_shot == True:
+                    p2smoke_time = p2smoke_time - 1
+                    if p2smoke == 0:
+                        print('the cloud will disapate soon')
+                        p2first_smoke_shot = False
+            else:
+                if p2smoke == True and p2smoke_time == 0:
+                    print('the enemy smoke has disapated')
+                    p2smoke = False
             while shots1 != p1gunsn:
                 if player1spreed == 'narrow':
                     long_or_short = random.randint(0, 1)
@@ -385,42 +423,7 @@ def battle_ai():
                 d.variable('shot',shot)
                 time.sleep(1)
                 shots1 = shots1 + 1
-                if p2smoke_time >= 1:
-                    if p2first_smoke_shot == True:
-                        p2smoke_time = p2smoke_time - 1
-                        p2first_smoke_shot = False
-                    if p2smoke_time == 0:
-                        print('the cloud of smoke will disapate soon')
-                    if shot in smoke_target_hit:
-                        print('target hit')
-                        magkaboom = disperstion
-                        a=random.randint(0,50)
-                        if magkaboom == true_range1 and a == 23:
-                            print('you detonated the enemy ammo,target sunk')
-                            damage = p2hp
-                            gameend = 1
-                            return gameend
-                        else:
-                            damage = int(random.randint(1, 5) * p1gunsc - p2armour)
-                            if damage <= 0:
-                                damage = damage * 0
-                                print('failed to penatrate target')
-
-                            else:
-                                print(' you did {0} damage'.format(damage))
-                                p2hp = p2hp - damage
-                                if p2hp <= 0:
-                                  p2hp = 0
-                                  gameend = 1
-                                  return gameend
-                    else:
-                        print('you missed')
-                else:
-                    if p2smoke == True and p2smoke_time == 0:
-                        print('the enemy smoke has disapated')
-                        p2smoke = False
-                    else:
-                        if true_range1 - 1 <= shot <= true_range1 + 1:
+                if true_range1 - 1 <= shot <= true_range1 + 1:
                             print('target hit')
                             hit1=True
                             magkaboom = disperstion
@@ -429,18 +432,19 @@ def battle_ai():
                                 print('critial hit')
                                 print('you detonated the enemy ammo,target sunk')
                                 damage = p2hp
-                                gameend = 1
+                                gameend = 5
                                 p2hp = p2hp - damage
+                                range_set = False
                                 return gameend
                             if magkaboom == true_range1 and a == 5:
-                                print('critial hit')
+                                print('critial hit..Ai turret has broken')
                                 r = random.choice(p2turrets)
                                 p2turrets.remove(r)
                                 p2gunsn = p2gunsn - r
                                 damage = int(random.randint(3, 7) * p1gunsc - p2armour)
                                 p2hp = p2hp - damage
                             if magkaboom == true_range1 and a == 10:
-                                print('critical hit')
+                                print('critical hit..the AI rangefinders damaged ')
                                 range_finder_damage2 += 1
                                 damage = int(random.randint(1, 3) * p1gunsc - p2armour)
                                 p2hp = p2hp - damage
@@ -454,14 +458,16 @@ def battle_ai():
                                     p2hp = p2hp - damage
                                     if p2hp <= 0:
                                         p2hp = 0
-                                        gameend = 1
+                                        gameend = 5
+                                        range_set = False
                                         return gameend
-                        else:
-                            if p2hp <= 0:
-                                p2hp = 0
-                                gameend = 1
-                                return gameend
-                            print('you missed')
+                else:
+                    print('you missed')
+                    if p2hp <= 0:
+                        p2hp = 0
+                        gameend = 5
+                        range_set = False
+                        return gameend
             else:
                 your_turn = 0
         elif (p1turn == '2'):
@@ -535,14 +541,23 @@ def battle_ai():
                 p2turn = random.choice(action)
                 ai_choose(p2turn,False)
                 if (p2turn == '1'):
-                    solution = range_finder(true_range2, hit2, range_finder_damage2, zero_in2)
-                    print(solution)
+                    solution = range_finder(true_range2, hit2, range_finder_damage2, zero_in2,p1smoke)
                     player2elevation = solution
                     if hit2 == True:
                         player2spreed= 'narrow'
                     else:
                         player2spreed = 'wide'
                     player2spreed.lower()
+                    if p1smoke_time >= 1:
+                        if p1first_smoke_shot == True:
+                            p1smoke_time = p1smoke_time - 1
+                            if p1smoke == 0:
+                                print('the cloud will disapate soon')
+                                p1first_smoke_shot = False
+                    else:
+                        if p1smoke == True and p1smoke_time == 0:
+                            print('the enemy smoke has disapated')
+                            p1smoke = False
                     while shots2 != p2gunsn:
                         if player2spreed == 'narrow':
                             long_or_short = random.randint(0, 1)
@@ -562,82 +577,51 @@ def battle_ai():
                         d.variable('shot', shot)
                         time.sleep(1)
                         shots2 = shots2 + 1
-                        if p1smoke_time >= 1:
-                            if p1first_smoke_shot == True:
-                                p1smoke_time = p1smoke_time - 1
-                                if p1smoke == 0:
-                                    print('the cloud will disapate soon')
-                                    p1first_smoke_shot = False
-                                    if shot in smoke_target_hit:
-                                        print('target hit')
-                                        magkaboom = random.randint(1, 300)
-                                        if magkaboom in magdet:
-                                            print('ai detonated your ammo,target sunk')
-                                            damage = p2hp
-                                            gameend = 4
-                                            return gameend
-                                        else:
-                                            damage = int(random.randint(1, 5) * p2gunsc - p1armour)
-                                            if damage <= 0:
-                                                damage = damage * 0
-                                                print('failed to penatrate target')
-                                            else:
-                                                print(' ai did {0} damage'.format(damage))
-                                                p2hp = p2hp - damage
-                                                if p2hp <= 0:
-                                                    p2hp = 0
-                                                    gameend = 4
-                                                    return gameend
-                                    else:
-                                        print('ai missed')
-                        else:
-                            if true_range2 - 1 <= shot <= true_range2 + 1:
-                                print('target hit')
-                                hit2 = True
-                                magkaboom = disperstion
-                                a = random.randint(0, 10)
-                                if magkaboom == true_range2 and a == 1:
-                                    print('critial hit')
-                                    print('you detonated the enemy ammo,target sunk')
-                                    damage = p1hp
-                                    gameend = 1
-                                    p1hp = p1hp - damage
-                                    return gameend
-                                if magkaboom == true_range2 and a == 5:
-                                    print('critial hit')
-                                    r = random.choice(p1turrets)
-                                    p1gunsn = p1gunsn - r
-                                    p1turrets.remove(r)
-                                    damage = int(random.randint(3, 7) * p1gunsc - p2armour)
-                                    p1hp = p1hp - damage
-                                    print(' ai did {0} damage'.format(damage))
-                                if magkaboom == true_range2 and a == 10:
-                                    print('critical hit')
-                                    range_finder_damage1 += 1
-                                    damage = int(random.randint(1, 3) * p1gunsc - p2armour)
-                                    p1hp = p1hp - damage
-                                    print(' ai did {0} damage'.format(damage))
-                                    p1hp = p1hp - damage
-                                else:
-                                    damage = int(random.randint(1, 5) * p2gunsc - p1armour)
-                                    if damage <= 0:
-                                        damage = damage * 0
-                                        print('failed to penatrate target')
-                                    print(' ai did {0} damage'.format(damage))
-                                    p1hp = p1hp - damage
-                                    if p1hp <= 0:
-                                        p1hp = 0
-                                        gameend = gameend + 4
-                                        return gameend
+                        if true_range2 - 1 <= shot <= true_range2 + 1:
+                            print('target hit')
+                            hit2 = True
+                            magkaboom = disperstion
+                            a = random.randint(0, 10)
+                            if magkaboom == true_range2 and a == 1:
+                                print('critial hit')
+                                print('the ammo exploded,we sunk')
+                                damage = p1hp
+                                gameend = 4
+                                p1hp = p1hp - damage
+                                range_set = False
+                                return gameend
+                            if magkaboom == true_range2 and a == 5:
+                                print('critial hit..our  turret crippled')
+                                r = random.choice(p1turrets)
+                                p1gunsn = p1gunsn - r
+                                p1turrets.remove(r)
+                                damage = int(random.randint(3, 7) * p1gunsc - p2armour)
+                                p1hp = p1hp - damage
+                                print(' ai did {0} damage'.format(damage))
+                            if magkaboom == true_range2 and a == 10:
+                                print('critical hit..our range finder hit')
+                                range_finder_damage1 += 1
+                                damage = int(random.randint(1, 3) * p1gunsc - p2armour)
+                                p1hp = p1hp - damage
+                                print(' ai did {0} damage'.format(damage))
+                                p1hp = p1hp - damage
                             else:
-                                if p1hp <= 0:
-                                    p1hp = 0
-                                    gameend = gameend + 4
-                                    return gameend
-                                print('target missed')
-                    else:
+                                damage = int(random.randint(1, 5) * p2gunsc - p1armour)
+                            if damage <= 0:
+                                damage = damage * 0
+                                print('failed to penatrate target')
+                            print(' ai did {0} damage'.format(damage))
+                            p1hp = p1hp - damage
+                            if p1hp <= 0:
+                                p1hp = 0
+                                gameend = 4
+                                range_set = False
+                                return gameend
+                        else:
+                            print('target missed')
+                else:
                         their_turn = 0
-                elif (p2turn == '2'):
+                if (p2turn == '2'):
                     print('depolying smoke screen..')
                     p2smoke = True
                     p2smoke_time = 2
@@ -683,15 +667,18 @@ def battle_ai():
                 firstime = False
                 return gameend
 
-
+def ai_ship():
+    global ship2
+    return ship2
 
 def ai_selection(p1h,p1armou,p1guns,p1guncs,p1turret):
-    global valid_ship2,p1hp,p1armour,p1gunsn,p1gunsc,p1turrets
+    global valid_ship2,p1hp,p1armour,p1gunsn,p1gunsc,p1turrets,ship2
     p1hp = p1h
     p1armour = p1armou
     p1gunsn = p1guns
     p1gunsc = p1guncs
     p1turrets = p1turret
+    valid_ship2 = False
     while valid_ship2 == False:
         ship2 = random.randint(0,25)
         if ship2 == 1:
