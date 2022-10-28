@@ -1,4 +1,4 @@
-#max 2018-
+#pacmax42 2018-
 #v0.1.9
 #planned features for the future:
 
@@ -1277,7 +1277,7 @@ class Starting_up:
         if gamemode== 'ai':
             self.p1 = first_selection()
             battleships_battle_test_ai.ai_selection(p1hp,p1armour,p1gunsn,p1gunsc,p1turrets)
-            gameend = 3
+            gameend = 9
         else:
             self.p1 = first_selection()
             self.p2 = second_selection()
@@ -1293,14 +1293,18 @@ class Starting_up:
         if gamemode == 'ai':
             self.p1 = first_selection()
             battleships_battle_test_ai.ai_selection(p1hp,p1armour,p1gunsn,p1gunsc,p1turrets)
-            gameend = 3
-            return gameend
+            gameend = 9
         else:
             self.p1 = first_selection()
             self.p2 = second_selection()
     def game_management(self,gameend):
         while gameend == 0:
             battle()
+        if gameend == 9:
+            true_range1 = round(random.uniform(5, 60), 1)
+            true_range2 = round(random.uniform(5, 60), 1)
+            x=battleships_battle_test_ai.set_ranges(true_range1,true_range2)
+            gameend=x
         if gameend == 1:
             print('player one won using {0} against {1}'.format(self.p1, self.p2))
             myfile = open('battle_results', 'a')
@@ -1318,7 +1322,7 @@ class Starting_up:
             else:
                 quit()
         while gameend == 3:
-            r=battleships_battle_test_ai.battle_ai()
+            r=battleships_battle_test_ai.battle_ai(gameend)
             gameend += r
         if gameend == 7:
             blank=''
@@ -1330,7 +1334,6 @@ class Starting_up:
             again = input('do you want to play again Y/N? ')
             if again.upper() == 'Y':
                 S.restart()
-                print(gameend)
             else:
                 quit()
         if gameend == 5:
@@ -1354,7 +1357,7 @@ class Starting_up:
                 S.restart()
             else:
                 quit()
-        else:
+        if gameend == 4:
             print('player two won using {0} against {1}'.format(self.p2, self.p1))
             myfile = open('battle_results', 'a')
             myfile.write('player two won using ')
@@ -1373,6 +1376,5 @@ class Starting_up:
 
 text_file_manger.read_text_file(r'C:\Users\GamingPC\Documents\coding\python\battleships project\study.txt')
 S=Starting_up()
-print(gameend)
 while True:
     S.game_management(gameend)
