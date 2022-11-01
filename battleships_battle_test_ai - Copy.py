@@ -126,6 +126,51 @@ class Debug:
         _args = _args[:len(_args) - 1]
         print("[FUNCTION]: Executed '%s' with '%s' as arguments." % (name, _args))
 d=Debug()
+def reset():
+    global start,targethit1,p1speed,shots1,shots2,p2speed,p1turrets,p2turrets,ship2,hit_scored2,hit_scored1,zero_in2,zero_in1,x,hit1,hit2,range_finder_damage2,range_finder_damage1,targethit2,targethit2,reset,p1smoke,p1smoke_time,p2smoke_time,p2smoke,gameend,firstime,your_turn,their_turn,y,p1smoke_charges,p2smoke_charges,p1first_smoke_shot,p2first_smoke_shot,p1moving,p1location,p2location,p2moving
+    reset = True
+    p1smoke = False
+    p1smoke_time = 0
+    p2smoke = False
+    p2smoke_time = 0
+    gameend = 0
+    firstime = True
+    your_turn = 1
+    p1location = 1
+    p2location = 1
+    if p1location >= 5:
+        p1location = 1
+    if p2location >= 5:
+        p2location = 1
+    their_turn = 1
+    y = 0
+    p1smoke_charges = 3
+    p2smoke_charges = 3
+    p1first_smoke_shot = False
+    p1location = 1
+    p2location = 1
+    p2first_smoke_shot = False
+    p1moving = False
+    p2moving = False
+    start = True
+    p1speed = 0
+    shots1 = 0
+    shots2 = 0
+    p2speed = 0
+    zero_in1 = 11
+    p1turrets = []
+    p2turrets = []
+    ship2 = ''
+    hit_scored1 = False
+    zero_in2 = 11
+    hit_scored2 = False
+    x = zero_in1 + 1
+    hit1 = False
+    hit2 = False
+    range_finder_damage1 = 0
+    range_finder_damage2 = 0
+    targethit1 = False
+    targethit2 = False
 def range_finder(true_range,hit_scored,damaged,zero_in,smoke):
     zero_in -= 1
     if damaged >= 4:
@@ -349,11 +394,13 @@ def battle_ai(gameend):
         p2hp = 0
         gameend = 5
         range_set = False
+        shots1 = 0
         return gameend
     if p1hp <= 0:
         p1hp = 0
         gameend = gameend + 4
         range_set = False
+        shots2 = 0
         return gameend
     your_turn = 1
     their_turn = 1
@@ -435,6 +482,7 @@ def battle_ai(gameend):
                                 gameend = 5
                                 p2hp = p2hp - damage
                                 range_set = False
+                                shots1 = 0
                                 return gameend
                             if magkaboom == true_range1 and a == 5:
                                 print('critial hit..Ai turret has broken')
@@ -460,6 +508,7 @@ def battle_ai(gameend):
                                         p2hp = 0
                                         gameend = 5
                                         range_set = False
+                                        shots1 = 0
                                         return gameend
                 else:
                     print('you missed')
@@ -589,6 +638,7 @@ def battle_ai(gameend):
                                 gameend = 4
                                 p1hp = p1hp - damage
                                 range_set = False
+                                shots2 = 0
                                 return gameend
                             if magkaboom == true_range2 and a == 5:
                                 print('critial hit..our  turret crippled')
@@ -616,6 +666,7 @@ def battle_ai(gameend):
                                 p1hp = 0
                                 gameend = 4
                                 range_set = False
+                                shots2 = 0
                                 return gameend
                         else:
                             print('target missed')
@@ -665,6 +716,7 @@ def battle_ai(gameend):
                 shots2 = 0
                 reset = True
                 firstime = False
+                shots2 = 0
                 return gameend
 
 def ai_ship():
